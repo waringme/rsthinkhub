@@ -39,7 +39,7 @@ class MyRequestsBlock {
     
     // Folder-based configuration
     const requestsFolder = this.block.getAttribute('data-requests-folder') || '/content/dam/rs-thinkhub/requests';
-    const folderStructure = this.block.getAttribute('data-folder-structure') || 'folderAsName';
+    const requestNaming = this.block.getAttribute('data-request-naming') || 'subfolderTitle';
     const includeSubfolders = this.block.getAttribute('data-include-subfolders') === 'true';
     const maxDepth = parseInt(this.block.getAttribute('data-max-depth')) || 0;
 
@@ -54,7 +54,7 @@ class MyRequestsBlock {
       showFilters,
       showActions,
       requestsFolder,
-      folderStructure,
+      requestNaming,
       includeSubfolders,
       maxDepth
     };
@@ -191,7 +191,7 @@ class MyRequestsBlock {
     // For now, we'll simulate the folder-based loading
     
     const folderPath = this.config.requestsFolder;
-    const folderStructure = this.config.folderStructure;
+    const requestNaming = this.config.requestNaming;
     const includeSubfolders = this.config.includeSubfolders;
     const maxDepth = this.config.maxDepth;
 
@@ -313,89 +313,36 @@ class MyRequestsBlock {
       throw new Error(`Folder not found: ${folderPath}`);
     }
 
-    // Process folder structure based on configuration
+    // Process direct subfolders as requests
     Object.entries(folder.children).forEach(([folderName, folderInfo]) => {
-      if (folderStructure === 'folderAsName') {
-        // Use subfolder title as request name
-        const item = {
-          id: `RH-${folderName.toUpperCase()}`,
-          title: folderInfo.title, // This is the subfolder title
-          description: `Request for ${folderInfo.title.toLowerCase()}`,
-          type: 'request',
-          status: folderInfo.status,
-          dateCreated: folderInfo.dateCreated,
-          dateModified: folderInfo.dateModified,
-          documentType: 'request',
-          referenceNumber: `RH-${folderName.toUpperCase()}`,
-          aemPath: folderInfo.documents?.[0]?.path || '',
-          contentFragment: folderInfo.contentFragments?.[0]?.path || '',
-          folderName: folderName,
-          documents: folderInfo.documents || [],
-          contentFragments: folderInfo.contentFragments || []
-        };
-        items.push(item);
-      } else if (folderStructure === 'subfolderStructure') {
-        // Create items for each document in subfolders, using subfolder title
-        folderInfo.documents?.forEach((doc, index) => {
-          const item = {
-            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            title: folderInfo.title, // Use subfolder title as primary title
-            description: `Document: ${doc.name.replace(/\.[^/.]+$/, '')} from ${folderInfo.title}`,
-            type: 'request',
-            status: folderInfo.status,
-            dateCreated: folderInfo.dateCreated,
-            dateModified: folderInfo.dateModified,
-            documentType: doc.type,
-            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            aemPath: doc.path,
-            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
-            folderName: folderName,
-            fileName: doc.name
-          };
-          items.push(item);
-        });
-      } else if (folderStructure === 'fileName') {
-        // Use file names as request names, but include subfolder context
-        folderInfo.documents?.forEach((doc, index) => {
-          const fileName = doc.name.replace(/\.[^/.]+$/, ''); // Remove extension
-          const item = {
-            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            title: fileName, // Use file name as title
-            description: `File from ${folderInfo.title} folder`,
-            type: 'request',
-            status: folderInfo.status,
-            dateCreated: folderInfo.dateCreated,
-            dateModified: folderInfo.dateModified,
-            documentType: doc.type,
-            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            aemPath: doc.path,
-            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
-            folderName: folderName,
-            fileName: doc.name
-          };
-          items.push(item);
-        });
-      } else if (folderStructure === 'metadataTitle') {
-        // Use metadata title if available, fallback to subfolder title
-        folderInfo.documents?.forEach((doc, index) => {
-          const item = {
-            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            title: doc.metadataTitle || folderInfo.title, // Use metadata title or fallback to subfolder title
-            description: `Document from ${folderInfo.title}`,
-            type: 'request',
-            status: folderInfo.status,
-            dateCreated: folderInfo.dateCreated,
-            dateModified: folderInfo.dateModified,
-            documentType: doc.type,
-            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
-            aemPath: doc.path,
-            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
-            folderName: folderName,
-            fileName: doc.name
-          };
-          items.push(item);
-        });
+      // Each direct subfolder becomes a request
+      let requestTitle = folderInfo.title; // Default: use subfolder title
+      
+      if (requestNaming === 'subfolderWithCount') {
+        const docCount = folderInfo.documents?.length || 0;
+        requestTitle = `${folderInfo.title} (${docCount} documents)`;
+      } else if (requestNaming === 'customPrefix') {
+        requestTitle = `Request: ${folderInfo.title}`;
       }
+      
+      const item = {
+        id: `RH-${folderName.toUpperCase()}`,
+        title: requestTitle,
+        description: `Request for ${folderInfo.title.toLowerCase()}`,
+        type: 'request',
+        status: folderInfo.status,
+        dateCreated: folderInfo.dateCreated,
+        dateModified: folderInfo.dateModified,
+        documentType: 'request',
+        referenceNumber: `RH-${folderName.toUpperCase()}`,
+        aemPath: folderInfo.documents?.[0]?.path || '',
+        contentFragment: folderInfo.contentFragments?.[0]?.path || '',
+        folderName: folderName,
+        documents: folderInfo.documents || [],
+        contentFragments: folderInfo.contentFragments || [],
+        documentCount: folderInfo.documents?.length || 0
+      };
+      items.push(item);
     });
 
     return items;

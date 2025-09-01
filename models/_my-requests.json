@@ -274,13 +274,13 @@
         {
           "component": "reference",
           "name": "requestsFolder",
-          "label": "Requests Folder",
-          "description": "Select the AEM folder containing the requests. The folder title will be used as the request name.",
+          "label": "My Requests Folder",
+          "description": "Select the AEM folder where your requests are stored. The direct subfolders of this folder will become your requests.",
           "multi": false,
           "folderPicker": {
             "enabled": true,
             "path": "/content/dam/rs-thinkhub/requests",
-            "title": "Select Requests Folder"
+            "title": "Select My Requests Folder"
           }
         },
         {
@@ -430,25 +430,21 @@
         },
         {
           "component": "multiselect",
-          "name": "folderStructure",
-          "label": "Folder Structure Interpretation",
-          "description": "How to interpret the folder structure for organizing requests",
+          "name": "requestNaming",
+          "label": "Request Naming",
+          "description": "How to name the requests from the subfolder titles",
           "options": [
             {
-              "name": "Use Folder Title as Request Name",
-              "value": "folderAsName"
+              "name": "Use Subfolder Title",
+              "value": "subfolderTitle"
             },
             {
-              "name": "Use Subfolder Structure",
-              "value": "subfolderStructure"
+              "name": "Use Subfolder Title + Document Count",
+              "value": "subfolderWithCount"
             },
             {
-              "name": "Use File Names",
-              "value": "fileName"
-            },
-            {
-              "name": "Use Metadata Title",
-              "value": "metadataTitle"
+              "name": "Use Custom Prefix + Subfolder Title",
+              "value": "customPrefix"
             }
           ]
         },
