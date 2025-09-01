@@ -359,32 +359,6 @@
         ]
       },
       {
-        "component": "reference",
-        "name": "linkedDocuments",
-        "label": "Linked Documents",
-        "description": "Select multiple documents from AEM Assets repository",
-        "multi": true,
-        "assetPicker": {
-          "enabled": true,
-          "multiple": true,
-          "path": "/content/dam",
-          "types": ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf"]
-        }
-      },
-      {
-        "component": "reference",
-        "name": "linkedContentFragments",
-        "label": "Linked Content Fragments",
-        "description": "Select multiple content fragments for editing",
-        "multi": true,
-        "contentFragmentPicker": {
-          "enabled": true,
-          "multiple": true,
-          "path": "/content/dam",
-          "model": "request"
-        }
-      },
-      {
         "component": "multiselect",
         "name": "documentTypes",
         "label": "Document Types to Include",
