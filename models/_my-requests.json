@@ -1,0 +1,433 @@
+{
+  "definitions": [
+    {
+      "title": "My Requests",
+      "id": "my-requests",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/my-requests/v1/my-requests",
+            "template": {
+              "model": "my-requests"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "my-requests",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Title",
+          "description": "The main title for the My Requests section"
+        },
+        {
+          "component": "text",
+          "name": "subtitle",
+          "label": "Subtitle",
+          "description": "Subtitle or description for the section"
+        },
+        {
+          "component": "multiselect",
+          "name": "style",
+          "label": "Style",
+          "options": [
+            {
+              "name": "Default",
+              "value": "default"
+            },
+            {
+              "name": "Compact",
+              "value": "compact"
+            },
+            {
+              "name": "Detailed",
+              "value": "detailed"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "displayType",
+          "label": "Display Type",
+          "options": [
+            {
+              "name": "Grid",
+              "value": "grid"
+            },
+            {
+              "name": "List",
+              "value": "list"
+            },
+            {
+              "name": "Cards",
+              "value": "cards"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "sortBy",
+          "label": "Sort By",
+          "options": [
+            {
+              "name": "Date Created",
+              "value": "dateCreated"
+            },
+            {
+              "name": "Date Modified",
+              "value": "dateModified"
+            },
+            {
+              "name": "Title",
+              "value": "title"
+            },
+            {
+              "name": "Type",
+              "value": "type"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "sortOrder",
+          "label": "Sort Order",
+          "options": [
+            {
+              "name": "Newest First",
+              "value": "desc"
+            },
+            {
+              "name": "Oldest First",
+              "value": "asc"
+            }
+          ]
+        },
+        {
+          "component": "number",
+          "name": "itemsPerPage",
+          "label": "Items Per Page",
+          "description": "Number of items to display per page (0 for all)"
+        },
+        {
+          "component": "multiselect",
+          "name": "showFilters",
+          "label": "Show Filters",
+          "options": [
+            {
+              "name": "Date Range",
+              "value": "dateRange"
+            },
+            {
+              "name": "Document Type",
+              "value": "documentType"
+            },
+            {
+              "name": "Status",
+              "value": "status"
+            },
+            {
+              "name": "Search",
+              "value": "search"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "showActions",
+          "label": "Show Actions",
+          "options": [
+            {
+              "name": "Download",
+              "value": "download"
+            },
+            {
+              "name": "Share",
+              "value": "share"
+            },
+            {
+              "name": "Delete",
+              "value": "delete"
+            },
+            {
+              "name": "Edit",
+              "value": "edit"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "linkedDocuments",
+          "label": "Linked Documents",
+          "description": "Select multiple documents from AEM Assets repository",
+          "options": [
+            {
+              "name": "Browse Assets",
+              "value": "browse"
+            }
+          ],
+          "allowMultiple": true,
+          "assetPicker": {
+            "enabled": true,
+            "multiple": true,
+            "path": "/content/dam",
+            "types": ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf"]
+          }
+        },
+        {
+          "component": "multiselect",
+          "name": "linkedContentFragments",
+          "label": "Linked Content Fragments",
+          "description": "Select multiple content fragments for editing",
+          "options": [
+            {
+              "name": "Browse Content Fragments",
+              "value": "browse"
+            }
+          ],
+          "allowMultiple": true,
+          "contentFragmentPicker": {
+            "enabled": true,
+            "multiple": true,
+            "path": "/content/dam",
+            "model": "request"
+          }
+        },
+        {
+          "component": "multiselect",
+          "name": "documentTypes",
+          "label": "Document Types to Include",
+          "description": "Filter which types of documents to display",
+          "options": [
+            {
+              "name": "Requests",
+              "value": "request"
+            },
+            {
+              "name": "Quotes",
+              "value": "quote"
+            },
+            {
+              "name": "Orders",
+              "value": "order"
+            },
+            {
+              "name": "Invoices",
+              "value": "invoice"
+            },
+            {
+              "name": "Documentation",
+              "value": "documentation"
+            },
+            {
+              "name": "Technical Specifications",
+              "value": "technical-spec"
+            },
+            {
+              "name": "Design Files",
+              "value": "design"
+            },
+            {
+              "name": "Reports",
+              "value": "report"
+            }
+          ],
+          "allowMultiple": true
+        },
+        {
+          "component": "multiselect",
+          "name": "statusFilter",
+          "label": "Status Filter",
+          "description": "Filter requests by status",
+          "options": [
+            {
+              "name": "Pending",
+              "value": "pending"
+            },
+            {
+              "name": "In Progress",
+              "value": "in-progress"
+            },
+            {
+              "name": "Completed",
+              "value": "completed"
+            },
+            {
+              "name": "Cancelled",
+              "value": "cancelled"
+            },
+            {
+              "name": "On Hold",
+              "value": "on-hold"
+            },
+            {
+              "name": "Under Review",
+              "value": "under-review"
+            }
+          ],
+          "allowMultiple": true
+        },
+        {
+          "component": "text",
+          "name": "customFilterQuery",
+          "label": "Custom Filter Query",
+          "description": "Advanced: Custom JCR query for filtering documents (optional)"
+        },
+        {
+          "component": "multiselect",
+          "name": "metadataFields",
+          "label": "Metadata Fields to Display",
+          "description": "Select which metadata fields to show in the list",
+          "options": [
+            {
+              "name": "Title",
+              "value": "title"
+            },
+            {
+              "name": "Description",
+              "value": "description"
+            },
+            {
+              "name": "Date Created",
+              "value": "dateCreated"
+            },
+            {
+              "name": "Date Modified",
+              "value": "dateModified"
+            },
+            {
+              "name": "Author",
+              "value": "author"
+            },
+            {
+              "name": "Status",
+              "value": "status"
+            },
+            {
+              "name": "Reference Number",
+              "value": "referenceNumber"
+            },
+            {
+              "name": "Document Type",
+              "value": "documentType"
+            },
+            {
+              "name": "File Size",
+              "value": "fileSize"
+            },
+            {
+              "name": "Version",
+              "value": "version"
+            },
+            {
+              "name": "Tags",
+              "value": "tags"
+            },
+            {
+              "name": "Category",
+              "value": "category"
+            }
+          ],
+          "allowMultiple": true
+        },
+        {
+          "component": "multiselect",
+          "name": "exportOptions",
+          "label": "Export Options",
+          "description": "Allow users to export the list",
+          "options": [
+            {
+              "name": "CSV Export",
+              "value": "csv"
+            },
+            {
+              "name": "Excel Export",
+              "value": "excel"
+            },
+            {
+              "name": "PDF Export",
+              "value": "pdf"
+            },
+            {
+              "name": "JSON Export",
+              "value": "json"
+            }
+          ],
+          "allowMultiple": true
+        },
+        {
+          "component": "checkbox",
+          "name": "enableBulkActions",
+          "label": "Enable Bulk Actions",
+          "description": "Allow users to select multiple items for bulk operations"
+        },
+        {
+          "component": "multiselect",
+          "name": "bulkActions",
+          "label": "Bulk Actions",
+          "description": "Actions available when bulk selection is enabled",
+          "options": [
+            {
+              "name": "Download Selected",
+              "value": "download"
+            },
+            {
+              "name": "Share Selected",
+              "value": "share"
+            },
+            {
+              "name": "Delete Selected",
+              "value": "delete"
+            },
+            {
+              "name": "Change Status",
+              "value": "changeStatus"
+            },
+            {
+              "name": "Add Tags",
+              "value": "addTags"
+            },
+            {
+              "name": "Move to Folder",
+              "value": "move"
+            }
+          ],
+          "allowMultiple": true
+        },
+        {
+          "component": "checkbox",
+          "name": "enableNotifications",
+          "label": "Enable Notifications",
+          "description": "Show notifications for actions like downloads, shares, etc."
+        },
+        {
+          "component": "text",
+          "name": "emptyStateMessage",
+          "label": "Empty State Message",
+          "description": "Custom message to display when no items are found"
+        },
+        {
+          "component": "text",
+          "name": "loadingStateMessage",
+          "label": "Loading State Message",
+          "description": "Custom message to display while loading items"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "my-requests",
+      "components": [
+        "text",
+        "title",
+        "button",
+        "image"
+      ]
+    }
+  ]
+}
