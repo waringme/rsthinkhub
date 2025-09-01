@@ -28,35 +28,20 @@ class MyRequestsBlock {
     // Get configuration from block attributes or default values
     const config = {};
     
-    // Extract configuration from block attributes
-    const style = this.block.getAttribute('data-style') || 'default';
-    const displayType = this.block.getAttribute('data-display-type') || 'grid';
-    const sortBy = this.block.getAttribute('data-sort-by') || 'dateCreated';
-    const sortOrder = this.block.getAttribute('data-sort-order') || 'desc';
-    const itemsPerPage = parseInt(this.block.getAttribute('data-items-per-page')) || 10;
-    const showFilters = this.block.getAttribute('data-show-filters')?.split(',') || [];
-    const showActions = this.block.getAttribute('data-show-actions')?.split(',') || [];
-    
-    // Folder-based configuration
-    const requestsFolder = this.block.getAttribute('data-requests-folder') || '/content/dam/rs-thinkhub/requests';
-    const requestNaming = this.block.getAttribute('data-request-naming') || 'subfolderTitle';
-    const includeSubfolders = this.block.getAttribute('data-include-subfolders') === 'true';
-    const maxDepth = parseInt(this.block.getAttribute('data-max-depth')) || 0;
+    // Extract folder configuration from block attributes
+    const folder = this.block.getAttribute('data-folder') || '/content/dam/rs-thinkhub/requests';
 
     return {
-      title: this.block.getAttribute('data-title') || 'My Requests',
-      subtitle: this.block.getAttribute('data-subtitle') || 'View and manage your submitted requests',
-      style,
-      displayType,
-      sortBy,
-      sortOrder,
-      itemsPerPage,
-      showFilters,
-      showActions,
-      requestsFolder,
-      requestNaming,
-      includeSubfolders,
-      maxDepth
+      title: 'My Requests',
+      subtitle: 'View and manage your submitted requests',
+      style: 'default',
+      displayType: 'grid',
+      sortBy: 'dateCreated',
+      sortOrder: 'desc',
+      itemsPerPage: 10,
+      showFilters: ['search', 'status'],
+      showActions: ['download', 'edit'],
+      folder
     };
   }
 
@@ -190,10 +175,7 @@ class MyRequestsBlock {
     // In a real implementation, this would make an AEM API call
     // For now, we'll simulate the folder-based loading
     
-    const folderPath = this.config.requestsFolder;
-    const requestNaming = this.config.requestNaming;
-    const includeSubfolders = this.config.includeSubfolders;
-    const maxDepth = this.config.maxDepth;
+    const folderPath = this.config.folder;
 
     // Simulate AEM folder structure with subfolder titles
     const folderData = {
@@ -316,18 +298,9 @@ class MyRequestsBlock {
     // Process direct subfolders as requests
     Object.entries(folder.children).forEach(([folderName, folderInfo]) => {
       // Each direct subfolder becomes a request
-      let requestTitle = folderInfo.title; // Default: use subfolder title
-      
-      if (requestNaming === 'subfolderWithCount') {
-        const docCount = folderInfo.documents?.length || 0;
-        requestTitle = `${folderInfo.title} (${docCount} documents)`;
-      } else if (requestNaming === 'customPrefix') {
-        requestTitle = `Request: ${folderInfo.title}`;
-      }
-      
       const item = {
         id: `RH-${folderName.toUpperCase()}`,
-        title: requestTitle,
+        title: folderInfo.title, // Use subfolder title as request name
         description: `Request for ${folderInfo.title.toLowerCase()}`,
         type: 'request',
         status: folderInfo.status,
