@@ -1,0 +1,176 @@
+{
+  "definitions": [
+    {
+      "title": "My Requests",
+      "id": "my-requests",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/my-requests/v1/my-requests",
+            "template": {
+              "model": "my-requests"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "my-requests",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Title",
+          "description": "The main title for the My Requests section"
+        },
+        {
+          "component": "text",
+          "name": "subtitle",
+          "label": "Subtitle",
+          "description": "Subtitle or description for the section"
+        },
+        {
+          "component": "multiselect",
+          "name": "style",
+          "label": "Style",
+          "options": [
+            {
+              "name": "Default",
+              "value": "default"
+            },
+            {
+              "name": "Compact",
+              "value": "compact"
+            },
+            {
+              "name": "Detailed",
+              "value": "detailed"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "displayType",
+          "label": "Display Type",
+          "options": [
+            {
+              "name": "Grid",
+              "value": "grid"
+            },
+            {
+              "name": "List",
+              "value": "list"
+            },
+            {
+              "name": "Cards",
+              "value": "cards"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "sortBy",
+          "label": "Sort By",
+          "options": [
+            {
+              "name": "Date Created",
+              "value": "dateCreated"
+            },
+            {
+              "name": "Date Modified",
+              "value": "dateModified"
+            },
+            {
+              "name": "Title",
+              "value": "title"
+            },
+            {
+              "name": "Type",
+              "value": "type"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "sortOrder",
+          "label": "Sort Order",
+          "options": [
+            {
+              "name": "Newest First",
+              "value": "desc"
+            },
+            {
+              "name": "Oldest First",
+              "value": "asc"
+            }
+          ]
+        },
+        {
+          "component": "number",
+          "name": "itemsPerPage",
+          "label": "Items Per Page",
+          "description": "Number of items to display per page (0 for all)"
+        },
+        {
+          "component": "multiselect",
+          "name": "showFilters",
+          "label": "Show Filters",
+          "options": [
+            {
+              "name": "Date Range",
+              "value": "dateRange"
+            },
+            {
+              "name": "Document Type",
+              "value": "documentType"
+            },
+            {
+              "name": "Status",
+              "value": "status"
+            },
+            {
+              "name": "Search",
+              "value": "search"
+            }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "showActions",
+          "label": "Show Actions",
+          "options": [
+            {
+              "name": "Download",
+              "value": "download"
+            },
+            {
+              "name": "Share",
+              "value": "share"
+            },
+            {
+              "name": "Delete",
+              "value": "delete"
+            },
+            {
+              "name": "Edit",
+              "value": "edit"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "my-requests",
+      "components": [
+        "text",
+        "title",
+        "button",
+        "image"
+      ]
+    }
+  ]
+}
