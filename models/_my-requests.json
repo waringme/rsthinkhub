@@ -20,16 +20,10 @@
       "id": "my-requests",
       "fields": [
         {
-          "component": "reference",
+          "component": "text",
           "name": "folder",
           "label": "Folder",
-          "description": "Select the AEM folder containing your requests. Direct subfolders will become your requests.",
-          "multi": false,
-          "contentFragmentPicker": {
-            "enabled": true,
-            "path": "/content/dam/rsthinkhub/customers",
-            "title": "Select Requests Folder"
-          }
+          "description": "Enter the AEM folder path containing your requests. Direct subfolders will become your requests."
         }
       ]
     }
