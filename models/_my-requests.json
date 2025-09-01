@@ -25,9 +25,9 @@
           "label": "Folder",
           "description": "Select the AEM folder containing your requests. Direct subfolders will become your requests.",
           "multi": false,
-          "folderPicker": {
+          "contentFragmentPicker": {
             "enabled": true,
-            "path": "/content/dam/rs-thinkhub/requests",
+            "path": "/content/dam/rsthinkhub/customers",
             "title": "Select Requests Folder"
           }
         }
