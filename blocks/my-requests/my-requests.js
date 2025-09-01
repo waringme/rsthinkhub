@@ -36,6 +36,12 @@ class MyRequestsBlock {
     const itemsPerPage = parseInt(this.block.getAttribute('data-items-per-page')) || 10;
     const showFilters = this.block.getAttribute('data-show-filters')?.split(',') || [];
     const showActions = this.block.getAttribute('data-show-actions')?.split(',') || [];
+    
+    // Folder-based configuration
+    const requestsFolder = this.block.getAttribute('data-requests-folder') || '/content/dam/rs-thinkhub/requests';
+    const folderStructure = this.block.getAttribute('data-folder-structure') || 'folderAsName';
+    const includeSubfolders = this.block.getAttribute('data-include-subfolders') === 'true';
+    const maxDepth = parseInt(this.block.getAttribute('data-max-depth')) || 0;
 
     return {
       title: this.block.getAttribute('data-title') || 'My Requests',
@@ -46,7 +52,11 @@ class MyRequestsBlock {
       sortOrder,
       itemsPerPage,
       showFilters,
-      showActions
+      showActions,
+      requestsFolder,
+      folderStructure,
+      includeSubfolders,
+      maxDepth
     };
   }
 
@@ -163,9 +173,237 @@ class MyRequestsBlock {
   }
 
   async loadItems() {
-    // Simulate loading AEM documents and content fragments
-    // In a real implementation, this would fetch data from AEM APIs
-    this.items = [
+    try {
+      // Load items from the configured AEM folder
+      this.items = await this.loadItemsFromFolder();
+    } catch (error) {
+      console.error('Error loading items from folder:', error);
+      // Fallback to sample data if folder loading fails
+      this.items = this.getSampleData();
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  async loadItemsFromFolder() {
+    // In a real implementation, this would make an AEM API call
+    // For now, we'll simulate the folder-based loading
+    
+    const folderPath = this.config.requestsFolder;
+    const folderStructure = this.config.folderStructure;
+    const includeSubfolders = this.config.includeSubfolders;
+    const maxDepth = this.config.maxDepth;
+
+    // Simulate AEM folder structure with subfolder titles
+    const folderData = {
+      '/content/dam/rs-thinkhub/requests': {
+        title: 'My Requests',
+        children: {
+          'industrial-automation': {
+            title: 'Industrial Automation System Design', // This becomes the request name
+            type: 'folder',
+            dateCreated: '2024-01-15T10:30:00Z',
+            dateModified: '2024-01-20T14:45:00Z',
+            status: 'in-progress',
+            documents: [
+              {
+                name: 'design-specification.pdf',
+                path: '/content/dam/rs-thinkhub/requests/industrial-automation/design-specification.pdf',
+                type: 'pdf',
+                size: '2.5MB',
+                metadataTitle: 'PLC Design Specification'
+              },
+              {
+                name: 'requirements.docx',
+                path: '/content/dam/rs-thinkhub/requests/industrial-automation/requirements.docx',
+                type: 'docx',
+                size: '1.2MB',
+                metadataTitle: 'System Requirements Document'
+              }
+            ],
+            contentFragments: [
+              {
+                name: 'automation-requirements',
+                path: '/content/dam/rs-thinkhub/fragments/automation-requirements'
+              }
+            ]
+          },
+          'power-distribution': {
+            title: 'Power Distribution Components Selection', // This becomes the request name
+            type: 'folder',
+            dateCreated: '2024-01-10T09:15:00Z',
+            dateModified: '2024-01-18T16:20:00Z',
+            status: 'completed',
+            documents: [
+              {
+                name: 'component-specs.pdf',
+                path: '/content/dam/rs-thinkhub/requests/power-distribution/component-specs.pdf',
+                type: 'pdf',
+                size: '3.1MB',
+                metadataTitle: 'Power Component Specifications'
+              }
+            ],
+            contentFragments: [
+              {
+                name: 'power-requirements',
+                path: '/content/dam/rs-thinkhub/fragments/power-requirements'
+              }
+            ]
+          },
+          'safety-systems': {
+            title: 'Safety System Integration Consultation', // This becomes the request name
+            type: 'folder',
+            dateCreated: '2024-01-22T11:00:00Z',
+            dateModified: '2024-01-22T11:00:00Z',
+            status: 'pending',
+            documents: [
+              {
+                name: 'safety-assessment.pdf',
+                path: '/content/dam/rs-thinkhub/requests/safety-systems/safety-assessment.pdf',
+                type: 'pdf',
+                size: '1.8MB',
+                metadataTitle: 'Safety System Assessment Report'
+              }
+            ],
+            contentFragments: [
+              {
+                name: 'safety-requirements',
+                path: '/content/dam/rs-thinkhub/fragments/safety-requirements'
+              }
+            ]
+          },
+          'control-panels': {
+            title: 'Custom Control Panel Design', // This becomes the request name
+            type: 'folder',
+            dateCreated: '2024-01-25T14:30:00Z',
+            dateModified: '2024-01-26T09:15:00Z',
+            status: 'in-progress',
+            documents: [
+              {
+                name: 'panel-layout.pdf',
+                path: '/content/dam/rs-thinkhub/requests/control-panels/panel-layout.pdf',
+                type: 'pdf',
+                size: '4.2MB',
+                metadataTitle: 'Control Panel Layout Design'
+              },
+              {
+                name: 'wiring-diagram.pdf',
+                path: '/content/dam/rs-thinkhub/requests/control-panels/wiring-diagram.pdf',
+                type: 'pdf',
+                size: '2.8MB',
+                metadataTitle: 'Wiring Diagram Specification'
+              }
+            ],
+            contentFragments: [
+              {
+                name: 'control-panel-specs',
+                path: '/content/dam/rs-thinkhub/fragments/control-panel-specs'
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    const items = [];
+    const folder = folderData[folderPath];
+    
+    if (!folder) {
+      throw new Error(`Folder not found: ${folderPath}`);
+    }
+
+    // Process folder structure based on configuration
+    Object.entries(folder.children).forEach(([folderName, folderInfo]) => {
+      if (folderStructure === 'folderAsName') {
+        // Use subfolder title as request name
+        const item = {
+          id: `RH-${folderName.toUpperCase()}`,
+          title: folderInfo.title, // This is the subfolder title
+          description: `Request for ${folderInfo.title.toLowerCase()}`,
+          type: 'request',
+          status: folderInfo.status,
+          dateCreated: folderInfo.dateCreated,
+          dateModified: folderInfo.dateModified,
+          documentType: 'request',
+          referenceNumber: `RH-${folderName.toUpperCase()}`,
+          aemPath: folderInfo.documents?.[0]?.path || '',
+          contentFragment: folderInfo.contentFragments?.[0]?.path || '',
+          folderName: folderName,
+          documents: folderInfo.documents || [],
+          contentFragments: folderInfo.contentFragments || []
+        };
+        items.push(item);
+      } else if (folderStructure === 'subfolderStructure') {
+        // Create items for each document in subfolders, using subfolder title
+        folderInfo.documents?.forEach((doc, index) => {
+          const item = {
+            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            title: folderInfo.title, // Use subfolder title as primary title
+            description: `Document: ${doc.name.replace(/\.[^/.]+$/, '')} from ${folderInfo.title}`,
+            type: 'request',
+            status: folderInfo.status,
+            dateCreated: folderInfo.dateCreated,
+            dateModified: folderInfo.dateModified,
+            documentType: doc.type,
+            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            aemPath: doc.path,
+            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
+            folderName: folderName,
+            fileName: doc.name
+          };
+          items.push(item);
+        });
+      } else if (folderStructure === 'fileName') {
+        // Use file names as request names, but include subfolder context
+        folderInfo.documents?.forEach((doc, index) => {
+          const fileName = doc.name.replace(/\.[^/.]+$/, ''); // Remove extension
+          const item = {
+            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            title: fileName, // Use file name as title
+            description: `File from ${folderInfo.title} folder`,
+            type: 'request',
+            status: folderInfo.status,
+            dateCreated: folderInfo.dateCreated,
+            dateModified: folderInfo.dateModified,
+            documentType: doc.type,
+            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            aemPath: doc.path,
+            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
+            folderName: folderName,
+            fileName: doc.name
+          };
+          items.push(item);
+        });
+      } else if (folderStructure === 'metadataTitle') {
+        // Use metadata title if available, fallback to subfolder title
+        folderInfo.documents?.forEach((doc, index) => {
+          const item = {
+            id: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            title: doc.metadataTitle || folderInfo.title, // Use metadata title or fallback to subfolder title
+            description: `Document from ${folderInfo.title}`,
+            type: 'request',
+            status: folderInfo.status,
+            dateCreated: folderInfo.dateCreated,
+            dateModified: folderInfo.dateModified,
+            documentType: doc.type,
+            referenceNumber: `RH-${folderName.toUpperCase()}-${index + 1}`,
+            aemPath: doc.path,
+            contentFragment: folderInfo.contentFragments?.[0]?.path || '',
+            folderName: folderName,
+            fileName: doc.name
+          };
+          items.push(item);
+        });
+      }
+    });
+
+    return items;
+  }
+
+  getSampleData() {
+    // Fallback sample data
+    return [
       {
         id: 'RH-ABC123-DEF',
         title: 'Industrial Automation System Design',
@@ -191,50 +429,8 @@ class MyRequestsBlock {
         referenceNumber: 'RH-XYZ789-GHI',
         aemPath: '/content/dam/rs-thinkhub/requests/power-distribution-selection.pdf',
         contentFragment: '/content/dam/rs-thinkhub/fragments/power-requirements'
-      },
-      {
-        id: 'RH-DEF456-JKL',
-        title: 'Safety System Integration Consultation',
-        description: 'Expert consultation required for integrating safety systems into existing manufacturing equipment.',
-        type: 'request',
-        status: 'pending',
-        dateCreated: '2024-01-22T11:00:00Z',
-        dateModified: '2024-01-22T11:00:00Z',
-        documentType: 'request',
-        referenceNumber: 'RH-DEF456-JKL',
-        aemPath: '/content/dam/rs-thinkhub/requests/safety-system-integration.pdf',
-        contentFragment: '/content/dam/rs-thinkhub/fragments/safety-requirements'
-      },
-      {
-        id: 'RH-MNO345-PQR',
-        title: 'Sensor Network Design Documentation',
-        description: 'Comprehensive documentation for a sensor network design including wiring diagrams and specifications.',
-        type: 'documentation',
-        status: 'completed',
-        dateCreated: '2024-01-05T08:45:00Z',
-        dateModified: '2024-01-12T13:30:00Z',
-        documentType: 'documentation',
-        referenceNumber: 'RH-MNO345-PQR',
-        aemPath: '/content/dam/rs-thinkhub/documents/sensor-network-design.pdf',
-        contentFragment: '/content/dam/rs-thinkhub/fragments/sensor-specifications'
-      },
-      {
-        id: 'RH-STU678-VWX',
-        title: 'Control Panel Quote Request',
-        description: 'Quote request for custom control panel design and manufacturing for process control application.',
-        type: 'quote',
-        status: 'in-progress',
-        dateCreated: '2024-01-18T15:20:00Z',
-        dateModified: '2024-01-21T10:15:00Z',
-        documentType: 'quote',
-        referenceNumber: 'RH-STU678-VWX',
-        aemPath: '/content/dam/rs-thinkhub/quotes/control-panel-quote.pdf',
-        contentFragment: '/content/dam/rs-thinkhub/fragments/control-panel-specs'
       }
     ];
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   bindEvents() {
