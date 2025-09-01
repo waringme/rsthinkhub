@@ -1,0 +1,62 @@
+{
+  "definitions": [
+    {
+      "title": "Request Help",
+      "id": "request-help",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/request-help/v1/request-help",
+            "template": {
+              "model": "request-help"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "request-help",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Title",
+          "description": "The main title for the request help form"
+        },
+        {
+          "component": "text",
+          "name": "subtitle",
+          "label": "Subtitle",
+          "description": "Subtitle or description for the form"
+        },
+        {
+          "component": "multiselect",
+          "name": "style",
+          "label": "Style",
+          "options": [
+            {
+              "name": "Default",
+              "value": "default"
+            },
+            {
+              "name": "Highlight",
+              "value": "highlight"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "request-help",
+      "components": [
+        "text",
+        "title",
+        "button"
+      ]
+    }
+  ]
+}
