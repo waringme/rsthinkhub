@@ -183,7 +183,7 @@ class RequestHelpForm {
               <div class="success-icon">✓</div>
               <h2>Request Submitted Successfully!</h2>
               <p>Thank you for your request. Our service desk team will review your information and provide either self-help resources or connect you with our technical services team within 24 hours.</p>
-              <p><strong>Reference Number:</strong> <span id="reference-number"></span></p>
+              <p><strong>Reference Number:</strong> <span id="reference-number">RS-1234567890</span></p>
             </div>
           </div>
         </div>
