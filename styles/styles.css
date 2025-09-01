@@ -16,8 +16,11 @@
   --light-color: #f8f8f8;
   --dark-color: #505050;
   --text-color: #131313;
-  --link-color: #3b63fb;
-  --link-hover-color: #1d3ecf;
+  --link-color: #0066cc;
+  --link-hover-color: #004499;
+  --nav-border-color: #e5e5e5;
+  --nav-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   /* fonts */
   --body-font-family: roboto, roboto-fallback, sans-serif;
