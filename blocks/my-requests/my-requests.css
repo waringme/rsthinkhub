@@ -540,3 +540,133 @@
   align-items: center;
   gap: 4px;
 }
+
+/* Expandable Folder List Styles */
+.my-requests .folder-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.my-requests .folder-item {
+  border: 1px solid #ddd;
+  margin: 5px 0;
+  border-radius: 4px;
+}
+
+.my-requests .folder-header {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.my-requests .folder-header:hover {
+  background-color: #e5e5e5;
+}
+
+.my-requests .folder-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.my-requests .expand-icon {
+  transition: transform 0.2s;
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.my-requests .folder-header.expanded .expand-icon {
+  transform: rotate(90deg);
+}
+
+.my-requests .folder-details {
+  padding: 10px;
+  background-color: #fafafa;
+  border-top: 1px solid #ddd;
+  animation: slideDown 0.2s ease-out;
+}
+
+.my-requests .folder-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.my-requests .folder-details button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: var(--link-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.my-requests .folder-details button:hover {
+  background: var(--link-hover-color);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+  }
+}
+
+/* Folder Contents Styles */
+.my-requests .folder-contents {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.my-requests .folder-content-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 5px 0;
+  font-size: 13px;
+}
+
+.my-requests .folder-content-item strong {
+  color: var(--text-color);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.my-requests .content-type {
+  color: #6c757d;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.my-requests .content-path {
+  color: #6c757d;
+  font-size: 11px;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+/* Loading Message Styles */
+.my-requests .loading-message {
+  color: #6c757d;
+  font-style: italic;
+  margin: 10px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}

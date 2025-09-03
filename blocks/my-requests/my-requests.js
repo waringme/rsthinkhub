@@ -1,711 +1,304 @@
 /**
- * My Requests Block - AEM Documents and Content Fragments Display
- * Renders links to documents stored in AEM assets repository and content fragments
- * with configurable display options, filtering, sorting, and pagination
+ * My Requests Block - Simple Universal Editor Config Output
  */
 
-class MyRequestsBlock {
-  constructor(block) {
-    this.block = block;
-    this.config = this.getConfig();
-    this.items = [];
-    this.filteredItems = [];
-    this.currentPage = 1;
-    this.itemsPerPage = this.config.itemsPerPage || 10;
-    this.filters = {
-      search: '',
-      dateRange: '',
-      documentType: '',
-      status: ''
-    };
-    this.sortBy = this.config.sortBy || 'dateCreated';
-    this.sortOrder = this.config.sortOrder || 'desc';
-    this.displayType = this.config.displayType || 'grid';
-    this.init();
-  }
+import { readBlockConfig } from '../../scripts/aem.js';
 
-  getConfig() {
-    // Get configuration from block attributes or default values
-    const config = {};
+// Global functions for folder interaction
+window.toggleFolder = function(folderName) {
+  const details = document.getElementById(`details-${folderName}`);
+  const icon = document.getElementById(`icon-${folderName}`);
+  const header = details.previousElementSibling;
+  
+  if (details.style.display === 'none') {
+    details.style.display = 'block';
+    icon.textContent = '▼';
+    header.classList.add('expanded');
     
-    // Extract folder configuration from block attributes
-    const folder = this.block.getAttribute('data-folder') || '/content/dam/rs-thinkhub/requests';
-
-    return {
-      title: 'My Requests',
-      subtitle: 'View and manage your submitted requests',
-      style: 'default',
-      displayType: 'grid',
-      sortBy: 'dateCreated',
-      sortOrder: 'desc',
-      itemsPerPage: 10,
-      showFilters: ['search', 'status'],
-      showActions: ['download', 'edit'],
-      folder
-    };
+    // Automatically load folder contents when expanded
+    loadFolderContents(folderName);
+  } else {
+    details.style.display = 'none';
+    icon.textContent = '▶';
+    header.classList.remove('expanded');
   }
+};
 
-  async init() {
-    this.createStructure();
-    await this.loadItems();
-    this.bindEvents();
-    this.render();
-  }
-
-  createStructure() {
-    this.block.innerHTML = `
-      <div class="my-requests ${this.config.style}">
-        <!-- Header -->
-        <div class="header">
-          <h2>${this.config.title}</h2>
-          <p>${this.config.subtitle}</p>
-        </div>
-
-        <!-- Filters -->
-        ${this.createFiltersHTML()}
-
-        <!-- Content Container -->
-        <div class="content-container">
-          <div class="loading-state" id="loading-state">
-            <div class="spinner"></div>
-            <p>Loading your requests...</p>
-          </div>
-          
-          <div class="empty-state" id="empty-state" style="display: none;">
-            <div class="icon">📄</div>
-            <h3>No requests found</h3>
-            <p>You haven't submitted any requests yet. Start by creating a new request.</p>
-          </div>
-
-          <div class="${this.displayType}-layout" id="content-layout" style="display: none;">
-            <!-- Items will be rendered here -->
-          </div>
-
-          <!-- Pagination -->
-          <div class="pagination" id="pagination" style="display: none;">
-            <!-- Pagination controls will be rendered here -->
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  createFiltersHTML() {
-    if (this.config.showFilters.length === 0) return '';
-
-    const filterHTML = this.config.showFilters.map(filter => {
-      switch (filter) {
-        case 'search':
-          return `
-            <div class="filter-group search-box">
-              <label for="search-input">Search requests</label>
-              <input type="text" id="search-input" placeholder="Search by title, description, or reference number...">
-            </div>
-          `;
-        case 'dateRange':
-          return `
-            <div class="filter-group">
-              <label for="date-range">Date Range</label>
-              <select id="date-range">
-                <option value="">All dates</option>
-                <option value="today">Today</option>
-                <option value="week">This week</option>
-                <option value="month">This month</option>
-                <option value="quarter">This quarter</option>
-                <option value="year">This year</option>
-              </select>
-            </div>
-          `;
-        case 'documentType':
-          return `
-            <div class="filter-group">
-              <label for="document-type">Document Type</label>
-              <select id="document-type">
-                <option value="">All types</option>
-                <option value="request">Request</option>
-                <option value="quote">Quote</option>
-                <option value="order">Order</option>
-                <option value="invoice">Invoice</option>
-                <option value="documentation">Documentation</option>
-              </select>
-            </div>
-          `;
-        case 'status':
-          return `
-            <div class="filter-group">
-              <label for="status-filter">Status</label>
-              <select id="status-filter">
-                <option value="">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          `;
-        default:
-          return '';
+window.loadFolderContents = async function(folderName) {
+  console.log(`Loading contents for folder: ${folderName}`);
+  
+  try {
+    // Construct the AEM Assets API URL for the specific folder
+    const aemUrl = 'https://author-p147324-e1509924.adobeaemcloud.com';
+    const folderPath = `/rsthinkhub/customers/waring/requests/${folderName}`;
+    const assetsApiPath = `/api/assets${folderPath}.json`;
+    const fullUrl = `${aemUrl}${assetsApiPath}`;
+    
+    console.log(`Fetching contents for folder: ${folderName}`);
+    console.log('AEM API URL:', fullUrl);
+    
+    // Make the API call to AEM with basic authentication
+    const username = 'cloud1999';
+    const password = 'cloud1999!';
+    const credentials = btoa(`${username}:${password}`);
+    
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`
       }
-    }).join('');
-
-    return `
-      <div class="filters">
-        <div class="filter-row">
-          ${filterHTML}
-        </div>
-      </div>
-    `;
-  }
-
-  async loadItems() {
-    try {
-      // Load items from the configured AEM folder
-      this.items = await this.loadItemsFromFolder();
-    } catch (error) {
-      console.error('Error loading items from folder:', error);
-      // Fallback to sample data if folder loading fails
-      this.items = this.getSampleData();
-    }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-
-  async loadItemsFromFolder() {
-    // In a real implementation, this would make an AEM API call
-    // For now, we'll simulate the folder-based loading
+    });
     
-    const folderPath = this.config.folder;
-
-    // Simulate AEM folder structure with subfolder titles
-    const folderData = {
-      '/content/dam/rs-thinkhub/requests': {
-        title: 'My Requests',
-        children: {
-          'industrial-automation': {
-            title: 'Industrial Automation System Design', // This becomes the request name
-            type: 'folder',
-            dateCreated: '2024-01-15T10:30:00Z',
-            dateModified: '2024-01-20T14:45:00Z',
-            status: 'in-progress',
-            documents: [
-              {
-                name: 'design-specification.pdf',
-                path: '/content/dam/rs-thinkhub/requests/industrial-automation/design-specification.pdf',
-                type: 'pdf',
-                size: '2.5MB',
-                metadataTitle: 'PLC Design Specification'
-              },
-              {
-                name: 'requirements.docx',
-                path: '/content/dam/rs-thinkhub/requests/industrial-automation/requirements.docx',
-                type: 'docx',
-                size: '1.2MB',
-                metadataTitle: 'System Requirements Document'
-              }
-            ],
-            contentFragments: [
-              {
-                name: 'automation-requirements',
-                path: '/content/dam/rs-thinkhub/fragments/automation-requirements'
-              }
-            ]
-          },
-          'power-distribution': {
-            title: 'Power Distribution Components Selection', // This becomes the request name
-            type: 'folder',
-            dateCreated: '2024-01-10T09:15:00Z',
-            dateModified: '2024-01-18T16:20:00Z',
-            status: 'completed',
-            documents: [
-              {
-                name: 'component-specs.pdf',
-                path: '/content/dam/rs-thinkhub/requests/power-distribution/component-specs.pdf',
-                type: 'pdf',
-                size: '3.1MB',
-                metadataTitle: 'Power Component Specifications'
-              }
-            ],
-            contentFragments: [
-              {
-                name: 'power-requirements',
-                path: '/content/dam/rs-thinkhub/fragments/power-requirements'
-              }
-            ]
-          },
-          'safety-systems': {
-            title: 'Safety System Integration Consultation', // This becomes the request name
-            type: 'folder',
-            dateCreated: '2024-01-22T11:00:00Z',
-            dateModified: '2024-01-22T11:00:00Z',
-            status: 'pending',
-            documents: [
-              {
-                name: 'safety-assessment.pdf',
-                path: '/content/dam/rs-thinkhub/requests/safety-systems/safety-assessment.pdf',
-                type: 'pdf',
-                size: '1.8MB',
-                metadataTitle: 'Safety System Assessment Report'
-              }
-            ],
-            contentFragments: [
-              {
-                name: 'safety-requirements',
-                path: '/content/dam/rs-thinkhub/fragments/safety-requirements'
-              }
-            ]
-          },
-          'control-panels': {
-            title: 'Custom Control Panel Design', // This becomes the request name
-            type: 'folder',
-            dateCreated: '2024-01-25T14:30:00Z',
-            dateModified: '2024-01-26T09:15:00Z',
-            status: 'in-progress',
-            documents: [
-              {
-                name: 'panel-layout.pdf',
-                path: '/content/dam/rs-thinkhub/requests/control-panels/panel-layout.pdf',
-                type: 'pdf',
-                size: '4.2MB',
-                metadataTitle: 'Control Panel Layout Design'
-              },
-              {
-                name: 'wiring-diagram.pdf',
-                path: '/content/dam/rs-thinkhub/requests/control-panels/wiring-diagram.pdf',
-                type: 'pdf',
-                size: '2.8MB',
-                metadataTitle: 'Wiring Diagram Specification'
-              }
-            ],
-            contentFragments: [
-              {
-                name: 'control-panel-specs',
-                path: '/content/dam/rs-thinkhub/fragments/control-panel-specs'
-              }
-            ]
-          }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`AEM Assets API Response for ${folderName}:`, data);
+    
+    // Extract and display folder contents
+    const contents = [];
+    
+    if (data.children) {
+      Object.entries(data.children).forEach(([itemName, itemInfo]) => {
+        contents.push({
+          name: itemName,
+          title: itemInfo['jcr:title'] || itemInfo.title || itemName,
+          type: itemInfo['jcr:primaryType'] || itemInfo.type || 'Unknown',
+          path: `${folderPath}/${itemName}`
+        });
+      });
+    } else if (data.entities) {
+      data.entities.forEach((entity) => {
+        const name = entity.properties?.name || entity.name || entity.title;
+        if (name) {
+          contents.push({
+            name: name,
+            title: entity.title || name,
+            type: entity.type || 'Unknown',
+            path: entity.path || `${folderPath}/${name}`
+          });
         }
-      }
-    };
-
-    const items = [];
-    const folder = folderData[folderPath];
+      });
+    }
     
-    if (!folder) {
-      throw new Error(`Folder not found: ${folderPath}`);
-    }
-
-    // Process direct subfolders as requests
-    Object.entries(folder.children).forEach(([folderName, folderInfo]) => {
-      // Each direct subfolder becomes a request
-      const item = {
-        id: `RH-${folderName.toUpperCase()}`,
-        title: folderInfo.title, // Use subfolder title as request name
-        description: `Request for ${folderInfo.title.toLowerCase()}`,
-        type: 'request',
-        status: folderInfo.status,
-        dateCreated: folderInfo.dateCreated,
-        dateModified: folderInfo.dateModified,
-        documentType: 'request',
-        referenceNumber: `RH-${folderName.toUpperCase()}`,
-        aemPath: folderInfo.documents?.[0]?.path || '',
-        contentFragment: folderInfo.contentFragments?.[0]?.path || '',
-        folderName: folderName,
-        documents: folderInfo.documents || [],
-        contentFragments: folderInfo.contentFragments || [],
-        documentCount: folderInfo.documents?.length || 0
-      };
-      items.push(item);
-    });
-
-    return items;
+    // Display the contents
+    displayFolderContents(folderName, contents);
+    
+  } catch (error) {
+    console.error(`Error loading contents for folder ${folderName}:`, error);
+    displayFolderContents(folderName, [], error.message);
   }
+};
 
-  getSampleData() {
-    // Fallback sample data
-    return [
-      {
-        id: 'RH-ABC123-DEF',
-        title: 'Industrial Automation System Design',
-        description: 'Request for design services for a new industrial automation system including PLC programming and HMI interface.',
-        type: 'request',
-        status: 'in-progress',
-        dateCreated: '2024-01-15T10:30:00Z',
-        dateModified: '2024-01-20T14:45:00Z',
-        documentType: 'request',
-        referenceNumber: 'RH-ABC123-DEF',
-        aemPath: '/content/dam/rs-thinkhub/requests/industrial-automation-design.pdf',
-        contentFragment: '/content/dam/rs-thinkhub/fragments/automation-requirements'
-      },
-      {
-        id: 'RH-XYZ789-GHI',
-        title: 'Power Distribution Components Selection',
-        description: 'Need assistance selecting appropriate power distribution components for a 480V 3-phase system.',
-        type: 'request',
-        status: 'completed',
-        dateCreated: '2024-01-10T09:15:00Z',
-        dateModified: '2024-01-18T16:20:00Z',
-        documentType: 'request',
-        referenceNumber: 'RH-XYZ789-GHI',
-        aemPath: '/content/dam/rs-thinkhub/requests/power-distribution-selection.pdf',
-        contentFragment: '/content/dam/rs-thinkhub/fragments/power-requirements'
-      }
-    ];
-  }
-
-  bindEvents() {
-    // Search filter
-    const searchInput = this.block.querySelector('#search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.filters.search = e.target.value;
-        this.applyFilters();
-      });
-    }
-
-    // Date range filter
-    const dateRangeSelect = this.block.querySelector('#date-range');
-    if (dateRangeSelect) {
-      dateRangeSelect.addEventListener('change', (e) => {
-        this.filters.dateRange = e.target.value;
-        this.applyFilters();
-      });
-    }
-
-    // Document type filter
-    const documentTypeSelect = this.block.querySelector('#document-type');
-    if (documentTypeSelect) {
-      documentTypeSelect.addEventListener('change', (e) => {
-        this.filters.documentType = e.target.value;
-        this.applyFilters();
-      });
-    }
-
-    // Status filter
-    const statusSelect = this.block.querySelector('#status-filter');
-    if (statusSelect) {
-      statusSelect.addEventListener('change', (e) => {
-        this.filters.status = e.target.value;
-        this.applyFilters();
-      });
-    }
-  }
-
-  applyFilters() {
-    this.filteredItems = this.items.filter(item => {
-      // Search filter
-      if (this.filters.search) {
-        const searchTerm = this.filters.search.toLowerCase();
-        const matchesSearch = 
-          item.title.toLowerCase().includes(searchTerm) ||
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.referenceNumber.toLowerCase().includes(searchTerm);
-        if (!matchesSearch) return false;
-      }
-
-      // Date range filter
-      if (this.filters.dateRange) {
-        const itemDate = new Date(item.dateCreated);
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
-        switch (this.filters.dateRange) {
-          case 'today':
-            const itemToday = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-            if (itemToday.getTime() !== today.getTime()) return false;
-            break;
-          case 'week':
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            if (itemDate < weekAgo) return false;
-            break;
-          case 'month':
-            const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-            if (itemDate < monthAgo) return false;
-            break;
-          case 'quarter':
-            const quarterAgo = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
-            if (itemDate < quarterAgo) return false;
-            break;
-          case 'year':
-            const yearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-            if (itemDate < yearAgo) return false;
-            break;
-        }
-      }
-
-      // Document type filter
-      if (this.filters.documentType && item.documentType !== this.filters.documentType) {
-        return false;
-      }
-
-      // Status filter
-      if (this.filters.status && item.status !== this.filters.status) {
-        return false;
-      }
-
-      return true;
-    });
-
-    this.sortItems();
-    this.currentPage = 1;
-    this.render();
-  }
-
-  sortItems() {
-    this.filteredItems.sort((a, b) => {
-      let aValue, bValue;
-
-      switch (this.sortBy) {
-        case 'dateCreated':
-          aValue = new Date(a.dateCreated);
-          bValue = new Date(b.dateCreated);
-          break;
-        case 'dateModified':
-          aValue = new Date(a.dateModified);
-          bValue = new Date(b.dateModified);
-          break;
-        case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        case 'type':
-          aValue = a.type.toLowerCase();
-          bValue = b.type.toLowerCase();
-          break;
-        default:
-          aValue = new Date(a.dateCreated);
-          bValue = new Date(b.dateCreated);
-      }
-
-      if (this.sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-  }
-
-  render() {
-    const loadingState = this.block.querySelector('#loading-state');
-    const emptyState = this.block.querySelector('#empty-state');
-    const contentLayout = this.block.querySelector('#content-layout');
-    const pagination = this.block.querySelector('#pagination');
-
-    // Hide loading state
-    loadingState.style.display = 'none';
-
-    if (this.filteredItems.length === 0) {
-      emptyState.style.display = 'block';
-      contentLayout.style.display = 'none';
-      pagination.style.display = 'none';
-      return;
-    }
-
-    emptyState.style.display = 'none';
-    contentLayout.style.display = 'block';
-
-    // Calculate pagination
-    const totalPages = Math.ceil(this.filteredItems.length / this.itemsPerPage);
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    const pageItems = this.filteredItems.slice(startIndex, endIndex);
-
-    // Render items
-    contentLayout.innerHTML = pageItems.map(item => this.renderItem(item)).join('');
-
-    // Render pagination
-    if (totalPages > 1) {
-      pagination.style.display = 'flex';
-      pagination.innerHTML = this.renderPagination(totalPages);
+function displayFolderContents(folderName, contents, error = null) {
+  const detailsElement = document.getElementById(`details-${folderName}`);
+  if (detailsElement) {
+    if (error) {
+      detailsElement.innerHTML = `
+        <p><strong>Error:</strong> ${error}</p>
+        <button onclick="loadFolderContents('${folderName}')">Retry</button>
+      `;
+    } else if (contents.length > 0) {
+      const contentsHTML = contents.map((item, index) => 
+        `<li class="folder-content-item">
+          <strong>${index + 1}. ${item.name}</strong>
+          <br><span class="content-type">Type: ${item.type}</span>
+          <br><span class="content-path">Path: ${item.path}</span>
+        </li>`
+      ).join('');
+      
+      detailsElement.innerHTML = `
+        <p><strong>Contents (${contents.length} items):</strong></p>
+        <ul class="folder-contents">${contentsHTML}</ul>
+      `;
     } else {
-      pagination.style.display = 'none';
-    }
-  }
-
-  renderItem(item) {
-    const icon = this.getIconForType(item.documentType);
-    const statusBadge = this.getStatusBadge(item.status);
-    const actions = this.renderActions(item);
-
-    switch (this.displayType) {
-      case 'list':
-        return `
-          <div class="item" data-id="${item.id}">
-            <div class="icon">${icon}</div>
-            <div class="content">
-              <h3>${item.title}</h3>
-              <div class="meta">
-                <span>${statusBadge}</span>
-                <span>${this.formatDate(item.dateCreated)}</span>
-                <span>${item.referenceNumber}</span>
-              </div>
-              <div class="description">${item.description}</div>
-            </div>
-            ${actions}
-          </div>
-        `;
-      
-      case 'cards':
-        return `
-          <div class="item" data-id="${item.id}">
-            <div class="card-header">
-              <div class="icon">${icon}</div>
-              <h3>${item.title}</h3>
-              <div class="meta">
-                <span>${statusBadge}</span>
-                <span>${this.formatDate(item.dateCreated)}</span>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="description">${item.description}</div>
-              <div class="meta">
-                <span><strong>Reference:</strong> ${item.referenceNumber}</span>
-              </div>
-              ${actions}
-            </div>
-          </div>
-        `;
-      
-      default: // grid
-        return `
-          <div class="item" data-id="${item.id}">
-            <div class="icon">${icon}</div>
-            <h3>${item.title}</h3>
-            <div class="meta">
-              <span>${statusBadge}</span>
-              <span>${this.formatDate(item.dateCreated)}</span>
-            </div>
-            <div class="description">${item.description}</div>
-            <div class="meta">
-              <span><strong>Reference:</strong> ${item.referenceNumber}</span>
-            </div>
-            ${actions}
-          </div>
-        `;
-    }
-  }
-
-  getIconForType(type) {
-    const icons = {
-      'request': '📋',
-      'quote': '💰',
-      'order': '📦',
-      'invoice': '🧾',
-      'documentation': '📄'
-    };
-    return icons[type] || '📄';
-  }
-
-  getStatusBadge(status) {
-    return `<span class="status-badge ${status}">${status.replace('-', ' ')}</span>`;
-  }
-
-  renderActions(item) {
-    if (this.config.showActions.length === 0) return '';
-
-    const actions = [];
-    
-    if (this.config.showActions.includes('download')) {
-      actions.push(`
-        <a href="${item.aemPath}" class="action-btn" target="_blank" title="Download document">
-          📥 Download
-        </a>
-      `);
-    }
-    
-    if (this.config.showActions.includes('share')) {
-      actions.push(`
-        <button class="action-btn" onclick="this.shareItem('${item.id}')" title="Share">
-          📤 Share
-        </button>
-      `);
-    }
-    
-    if (this.config.showActions.includes('edit')) {
-      actions.push(`
-        <a href="/editor.html${item.contentFragment}" class="action-btn" target="_blank" title="Edit content">
-          ✏️ Edit
-        </a>
-      `);
-    }
-    
-    if (this.config.showActions.includes('delete')) {
-      actions.push(`
-        <button class="action-btn danger" onclick="this.deleteItem('${item.id}')" title="Delete">
-          🗑️ Delete
-        </button>
-      `);
-    }
-
-    return `<div class="actions">${actions.join('')}</div>`;
-  }
-
-  renderPagination(totalPages) {
-    const pages = [];
-    const currentPage = this.currentPage;
-
-    // Previous button
-    pages.push(`
-      <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="this.goToPage(${currentPage - 1})">
-        ← Previous
-      </button>
-    `);
-
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-        pages.push(`
-          <button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="this.goToPage(${i})">
-            ${i}
-          </button>
-        `);
-      } else if (i === currentPage - 3 || i === currentPage + 3) {
-        pages.push('<span class="page-btn" disabled>...</span>');
-      }
-    }
-
-    // Next button
-    pages.push(`
-      <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="this.goToPage(${currentPage + 1})">
-        Next →
-      </button>
-    `);
-
-    return pages.join('');
-  }
-
-  goToPage(page) {
-    this.currentPage = page;
-    this.render();
-  }
-
-  formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  // Action methods (to be implemented based on AEM integration)
-  shareItem(itemId) {
-    console.log('Share item:', itemId);
-    // Implement sharing functionality
-  }
-
-  deleteItem(itemId) {
-    if (confirm('Are you sure you want to delete this item?')) {
-      console.log('Delete item:', itemId);
-      // Implement deletion functionality
+      detailsElement.innerHTML = `
+        <p><strong>Contents:</strong> No items found</p>
+      `;
     }
   }
 }
 
-/**
- * Decorates the my requests block
- * @param {Element} block The my requests block element
- */
+function updateFolderListHTML(folderNames) {
+  const folderListElement = document.getElementById('folder-list');
+  if (folderListElement) {
+    if (folderNames.length > 0) {
+      const listHTML = folderNames.map((folderName, index) => 
+        `<li class="folder-item" data-folder="${folderName}">
+          <div class="folder-header" onclick="toggleFolder('${folderName}')">
+            <span class="folder-name">${index + 1}. ${folderName}</span>
+            <span class="expand-icon" id="icon-${folderName}">▶</span>
+          </div>
+          <div class="folder-details" id="details-${folderName}" style="display: none;">
+            <p><strong>Folder Name:</strong> ${folderName}</p>
+            <p><strong>Path:</strong> /content/dam/rsthinkhub/customers/waring/requests/${folderName}</p>
+            <p><strong>Type:</strong> sling:Folder</p>
+            <p class="loading-message">Loading contents...</p>
+          </div>
+        </li>`
+      ).join('');
+      
+      folderListElement.innerHTML = `
+        <h3>My Requests</h3>
+        <ul class="folder-list">${listHTML}</ul>
+      `;
+    } else {
+      folderListElement.innerHTML = `
+        <h3>No folders found</h3>
+      `;
+    }
+  }
+}
+
+async function fetchSubfolders(folderPath) {
+  try {
+    console.log('Fetching subfolders from AEM for path:', folderPath);
+    
+    // Construct the AEM Assets API URL
+    const aemUrl = 'https://author-p147324-e1509924.adobeaemcloud.com';
+
+
+
+    const assetsApiPath = `/api/assets/rsthinkhub/customers/waring/requests.json`;
+    const fullUrl = `${aemUrl}${assetsApiPath}`;
+    
+    console.log('AEM API URL:', fullUrl);
+    
+    // Make the API call to AEM with basic authentication
+    const username = 'cloud1999';
+    const password = 'cloud1999!';
+    const credentials = btoa(`${username}:${password}`);
+    
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    console.log('Response Content-Type:', contentType);
+    
+
+    
+    const data = await response.json();
+    console.log('AEM Assets API Response:', data);
+    
+    // Parse and extract folder names
+    const folderNames = [];
+    
+    // Extract folder names from different response formats
+    if (data.children) {
+      Object.entries(data.children).forEach(([folderName, folderInfo]) => {
+        folderNames.push(folderName);
+      });
+    } else if (data.entities) {
+      data.entities.forEach((entity) => {
+        // Extract name from entities -> properties -> name
+        const name = entity.properties?.name || entity.name || entity.title;
+        if (name) {
+          folderNames.push(name);
+        }
+      });
+    }
+    
+    // Print folder names in a list
+    console.log('My Requests Block - Folder Names List:');
+    if (folderNames.length > 0) {
+      folderNames.forEach((folderName, index) => {
+        console.log(`${index + 1}. ${folderName}`);
+      });
+    } else {
+      console.log('No folders found');
+    }
+    
+    // Update HTML with folder list
+    updateFolderListHTML(folderNames);
+    
+    // Also print detailed information
+    console.log('My Requests Block - Detailed Folder Information:');
+    if (data.children) {
+      Object.entries(data.children).forEach(([folderName, folderInfo], index) => {
+        console.log(`${index + 1}. ${folderName}`);
+        console.log(`   Title: ${folderInfo['jcr:title'] || folderInfo.title || folderName}`);
+        console.log(`   Path: ${folderPath}/${folderName}`);
+        console.log(`   Type: ${folderInfo['jcr:primaryType'] || folderInfo.type || 'Unknown'}`);
+        console.log('');
+      });
+    } else if (data.entities) {
+      data.entities.forEach((entity, index) => {
+        const name = entity.properties?.name || entity.name || entity.title || `Item ${index + 1}`;
+        console.log(`${index + 1}. ${name}`);
+        console.log(`   Properties Name: ${entity.properties?.name || 'Not found'}`);
+        console.log(`   Entity Name: ${entity.name || 'Not found'}`);
+        console.log(`   Title: ${entity.title || name}`);
+        console.log(`   Path: ${entity.path || folderPath}/${name}`);
+        console.log(`   Type: ${entity.type || 'Unknown'}`);
+        console.log(`   Properties: ${JSON.stringify(entity.properties || {})}`);
+        console.log('');
+      });
+    } else {
+      console.log('No subfolders found in:', folderPath);
+    }
+    
+    } catch (error) {
+    console.error('Error fetching subfolders from AEM:', error);
+    console.log('My Requests Block - Failed to fetch subfolders from:', folderPath);
+    
+    // Update HTML to show error
+    const folderListElement = document.getElementById('folder-list');
+    if (folderListElement) {
+      folderListElement.innerHTML = `
+        <h3>Error loading folders</h3>
+        <p>Failed to fetch folders from: ${folderPath}</p>
+        <p>Error: ${error.message}</p>
+      `;
+    }
+  }
+}
+
 export default function decorate(block) {
-  new MyRequestsBlock(block);
+  try {
+    // Read the Universal Editor configuration
+    const config = readBlockConfig(block);
+    
+    // Set default folder path if not configured
+    if (!config.folder) {
+      config.folder = '/content/dam/rsthinkhub/customers/waring/requests/';
+    }
+    
+    // Log the configuration
+    console.log('My Requests Block - Universal Editor Config:', config);
+    
+    // Print the folder value specifically
+    console.log('My Requests Block - Folder Value:', config.folder);
+    
+    // Fetch subfolders from AEM
+    fetchSubfolders(config.folder);
+    
+    // Simple output of the configuration
+    block.innerHTML = `
+      <div class="my-requests">
+  
+
+        <div id="folder-list">
+          <h3>Loading folders...</h3>
+        </div>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.log(`failed to load module for my-requests`, error);
+    block.innerHTML = `<div class="my-requests"><p>Error loading configuration</p></div>`;
+  }
 }
