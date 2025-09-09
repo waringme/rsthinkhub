@@ -142,6 +142,9 @@ function updateFolderListHTML(folderNames) {
       ).join('');
       
       folderListElement.innerHTML = `
+        <div class="banner-image">
+          <img src="https://s7g10.scene7.com/is/image/AGS487/sample-banner?$welcome=Welcome&$name=Tim&$cta=Special%20Offer%20to%20help%20you%20with%20your%20project%3F&$src-image=AGS487/eaton-motor-2&wid=2000&hei=2000&qlt=100&fit=constrain" alt="Welcome Banner" />
+        </div>
         <h3>My Requests</h3>
         <ul class="folder-list">${listHTML}</ul>
       `;
