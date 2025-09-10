@@ -134,7 +134,7 @@ class RequestHelpForm {
                 <div class="form-group">
                   <label for="voltage-requirements">What are your voltage and power requirements?</label>
                   <input type="text" id="voltage-requirements" name="voltageRequirements" 
-                    placeholder="e.g., 24V DC, 120V AC, 480V 3-phase">
+                    placeholder="e.g., 24V DC, 120V AC, 480V 3-phase" value="24V DC">
                 </div>
                 <div class="form-group">
                   <label for="environmental-conditions">What environmental conditions will the system operate in?</label>
@@ -283,7 +283,7 @@ class RequestHelpForm {
         return this.formData.step2 !== null;
       case 3:
         // Check if required fields are filled
-        const requiredFields = ['projectType', 'projectDescription', 'voltageRequirements', 'environmentalConditions', 'projectTimeline', 'budgetRange'];
+        const requiredFields = [];
         return requiredFields.every(field => {
           const input = this.block.querySelector(`[name="${field}"]`);
           return input && input.value.trim() !== '';
