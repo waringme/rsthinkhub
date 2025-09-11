@@ -145,6 +145,14 @@ function updateFolderListHTML(folderNames) {
         <div class="banner-image">
           <img src="https://s7g10.scene7.com/is/image/AGS487/sample-banner?$welcome=Welcome&$name=Tim&$cta=Special%20Offer%20to%20help%20you%20with%20your%20project%3F&$src-image=AGS487/eaton-motor-2&wid=2000&hei=2000&qlt=100&fit=constrain" alt="Welcome Banner" />
         </div>
+        <div class="video-container">
+          <iframe 
+            src="https://s7g10.scene7.com/s7viewers/html5/VideoViewer.html?asset=AGS487/How%20a%20Contactor%20Works%20Well%20Explained%20_%20Parts%20and%20Operation-AVS&config=DynamicMediaNA/Video&serverUrl=https://s7g10.scene7.com/is/image/&contenturl=https://s7g10.scene7.com/is/content/&posterimage=AGS487/How%20a%20Contactor%20Works%20Well%20Explained%20_%20Parts%20and%20Operation-AVS&videoserverurl=https://s7g10.scene7.com/is/content"
+            title="How a Contactor Works - Well Explained Parts and Operation"
+            frameborder="0"
+            allowfullscreen>
+          </iframe>
+        </div>
         <h3>My Requests</h3>
         <ul class="folder-list">${listHTML}</ul>
       `;
