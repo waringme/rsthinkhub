@@ -127,7 +127,7 @@ class RequestHelpForm {
                   <textarea id="project-description" name="projectDescription" 
                     placeholder="Please provide a detailed description of your project, including goals, constraints, and any specific challenges you're facing...">Project Overview:
 
-Objective: To design a high-efficiency cooling system for industrial use]
+Objective: To design a high-efficiency cooling system for industrial use
 
 Deliverables: CAD models, technical drawings, BOMs, performance simulations, and compliance documentation
 
