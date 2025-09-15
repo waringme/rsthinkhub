@@ -127,13 +127,13 @@ class RequestHelpForm {
                   <textarea id="project-description" name="projectDescription" 
                     placeholder="Please provide a detailed description of your project, including goals, constraints, and any specific challenges you're facing...">Project Overview:
 
-Objective: [e.g., To design a high-efficiency cooling system for industrial use]
+Objective: To design a high-efficiency cooling system for industrial use]
 
 Deliverables: CAD models, technical drawings, BOMs, performance simulations, and compliance documentation
 
-Timeline: [e.g., Initial concepts by October 1st, final design by November 30th]
+Timeline: nitial concepts by October 1st, final design by November 30th
 
-Constraints: [e.g., Must comply with ISO standards, limited to specific materials, etc.]</textarea>
+Constraints: Must comply with ISO standards, limited to specific materials, etc.</textarea>
                 </div>
               </div>
 
