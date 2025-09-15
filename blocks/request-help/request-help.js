@@ -131,7 +131,7 @@ Objective: To design a high-efficiency cooling system for industrial use]
 
 Deliverables: CAD models, technical drawings, BOMs, performance simulations, and compliance documentation
 
-Timeline: nitial concepts by October 1st, final design by November 30th
+Timeline: Initial concepts by October 1st, final design by November 30th
 
 Constraints: Must comply with ISO standards, limited to specific materials, etc.</textarea>
                 </div>
